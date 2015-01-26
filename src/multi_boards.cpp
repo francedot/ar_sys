@@ -41,6 +41,7 @@ class ArSysMultiBoards
 		bool draw_markers;
 		bool draw_markers_cube;
 		bool draw_markers_axis;
+        bool publish_tf;
 		MarkerDetector mDetector;
 		vector<Marker> markers;
 		BoardDetector the_board_detector;
@@ -82,6 +83,7 @@ class ArSysMultiBoards
 			nh.param<bool>("draw_markers", draw_markers, false);
 			nh.param<bool>("draw_markers_cube", draw_markers_cube, false);
 			nh.param<bool>("draw_markers_axis", draw_markers_axis, false);
+            nh.param<bool>("publish_tf", publish_tf, false);
 
 			readFromFile(boards_config.c_str());
 			ROS_INFO("ArSys node started with boards configuration: %s", boards_config.c_str());
@@ -129,6 +131,8 @@ class ArSysMultiBoards
 
 		void image_callback(const sensor_msgs::ImageConstPtr& msg)
 		{
+            static tf::TransformBroadcaster br;
+            
 			if(!cam_info_received) return;
 
 			cv_bridge::CvImagePtr cv_ptr;
@@ -159,6 +163,9 @@ class ArSysMultiBoards
 
 						tf::StampedTransform stampedTransform(transform, msg->header.stamp, msg->header.frame_id, boards[board_index].name);
 
+                        if (publish_tf) 
+                            br.sendTransform(stampedTransform);
+                        
 						geometry_msgs::PoseStamped poseMsg;
 						tf::poseTFToMsg(transform, poseMsg.pose);
 						poseMsg.header.frame_id = msg->header.frame_id;

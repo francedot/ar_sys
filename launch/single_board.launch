@@ -24,6 +24,7 @@
 	<arg name="board_config" default="$(find ar_sys)/data/single/board.yml" />
 	<arg name="board_frame_id" default="board1" />
 	<arg name="marker_size" default="0.05" />
+    <arg name="publish_tf" default="false" />
 
 
 	<group if="$(arg camera_enable)">
@@ -49,6 +50,7 @@
 		<param name="draw_markers" type="bool" value="$(arg result_draw_markers)" />
 		<param name="draw_markers_cube" type="bool" value="$(arg result_draw_markers_cube)" />
 		<param name="draw_markers_axis" type="bool" value="$(arg result_draw_markers_axis)" />
+        <param name="publish_tf" value="$(arg publish_tf)" />
 	</node>
 
 	<node ns="/" pkg="topic_tools" type="relay" name="ar_single_board_relay$(arg uid)" args="/ar_single_board$(arg uid)/transform /arsys_single_board/transform" />
