@@ -33,6 +33,7 @@ class ArSysSingleBoard
 		bool draw_markers;
 		bool draw_markers_cube;
 		bool draw_markers_axis;
+        bool publish_tf;
 		MarkerDetector mDetector;
 		vector<Marker> markers;
 		BoardConfiguration the_board_config;
@@ -78,6 +79,7 @@ class ArSysSingleBoard
 			nh.param<bool>("draw_markers", draw_markers, false);
 			nh.param<bool>("draw_markers_cube", draw_markers_cube, false);
 			nh.param<bool>("draw_markers_axis", draw_markers_axis, false);
+            nh.param<bool>("publish_tf", publish_tf, false);
 
 			the_board_config.readFromFile(board_config.c_str());
 
@@ -87,6 +89,8 @@ class ArSysSingleBoard
 
 		void image_callback(const sensor_msgs::ImageConstPtr& msg)
 		{
+            static tf::TransformBroadcaster br;
+            
 			if(!cam_info_received) return;
 
 			cv_bridge::CvImagePtr cv_ptr;
@@ -107,6 +111,9 @@ class ArSysSingleBoard
 					tf::Transform transform = ar_sys::getTf(the_board_detected.Rvec, the_board_detected.Tvec);
 
 					tf::StampedTransform stampedTransform(transform, msg->header.stamp, msg->header.frame_id, board_frame);
+                    
+                    if (publish_tf) 
+                        br.sendTransform(stampedTransform);
 
 					geometry_msgs::PoseStamped poseMsg;
 					tf::poseTFToMsg(transform, poseMsg.pose);
