@@ -46,7 +46,7 @@
 		<param name="image_is_rectified" type="bool" value="$(arg video_rectified)"/>
 		<param name="board_config" type="string" value="$(arg board_config)"/>
 		<param name="board_frame" type="string" value="/$(arg board_frame_id)" />
-		<param name="marker_size" type="string" value="$(arg marker_size)"/>
+		<param name="marker_size" type="double" value="$(arg marker_size)"/>
 		<param name="draw_markers" type="bool" value="$(arg result_draw_markers)" />
 		<param name="draw_markers_cube" type="bool" value="$(arg result_draw_markers_cube)" />
 		<param name="draw_markers_axis" type="bool" value="$(arg result_draw_markers_axis)" />
