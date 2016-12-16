@@ -21,6 +21,7 @@
 #include <ar_sys/utils.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
+#include <std_msgs/String.h>
 
 using namespace aruco;
 
@@ -40,6 +41,7 @@ class ArSysSingleBoard
 		BoardDetector the_board_detector;
 		Board the_board_detected;
 		ros::Subscriber cam_info_sub;
+		ros::Subscriber switch_board_sub;
 		bool cam_info_received;
 		image_transport::Publisher image_pub;
 		image_transport::Publisher debug_pub;
@@ -49,7 +51,11 @@ class ArSysSingleBoard
 		std::string board_frame;
 
 		double marker_size;
+		double marker_size_outer;
+		double marker_size_inner;
 		std::string board_config;
+		std::string board_config_outer;
+		std::string board_config_inner;
 
 		ros::NodeHandle nh;
 		image_transport::ImageTransport it;
@@ -66,14 +72,20 @@ class ArSysSingleBoard
 			image_sub = it.subscribe("/image", 1, &ArSysSingleBoard::image_callback, this);
 			cam_info_sub = nh.subscribe("/camera_info", 1, &ArSysSingleBoard::cam_info_callback, this);
 
+			switch_board_sub = nh.subscribe("/switch_board", 1, &ArSysSingleBoard::switch_board_callback, this);
+
 			image_pub = it.advertise("result", 1);
 			debug_pub = it.advertise("debug", 1);
 			pose_pub = nh.advertise<geometry_msgs::PoseStamped>("pose", 100);
 			transform_pub = nh.advertise<geometry_msgs::TransformStamped>("transform", 100);
 			position_pub = nh.advertise<geometry_msgs::Vector3Stamped>("position", 100);
 
-			nh.param<double>("marker_size", marker_size, 0.05);
-			nh.param<std::string>("board_config", board_config, "boardConfiguration.yml");
+			nh.param<double>("marker_size_outer", marker_size_outer, 0.05);
+			nh.param<double>("marker_size_inner", marker_size_inner, 0.05);
+			nh.param<double>("marker_size", marker_size, marker_size_outer); // start with outer board
+			nh.param<std::string>("board_config_outer", board_config_outer, "boardConfiguration.yml");
+			nh.param<std::string>("board_config_inner", board_config_inner, "boardConfiguration.yml");
+			nh.param<std::string>("board_config", board_config, board_config_outer); // start with outer board
 			nh.param<std::string>("board_frame", board_frame, "");
 			nh.param<bool>("image_is_rectified", useRectifiedImages, true);
 			nh.param<bool>("draw_markers", draw_markers, false);
@@ -184,6 +196,25 @@ class ArSysSingleBoard
 			camParam = ar_sys::getCamParams(msg, useRectifiedImages);
 			cam_info_received = true;
 			cam_info_sub.shutdown();
+		}
+
+		void switch_board_callback(const std_msgs::StringConstPtr &msg)
+		{
+			if (msg->data == "outer") {
+				ROS_INFO("ar_single_board: Request board switch to outer");
+				board_config = board_config_outer;
+				marker_size = marker_size_outer;
+			} else if (msg->data == "inner") {
+				ROS_INFO("ar_single_board: Request board switch to inner");
+				board_config = board_config_inner;
+				marker_size = marker_size_inner;
+			}
+
+			// Update board
+			the_board_config.readFromFile(board_config.c_str());
+
+			ROS_INFO("ArSys node updated with marker size of %f m and board configuration: %s",
+					 marker_size, board_config.c_str());
 		}
 };
 
