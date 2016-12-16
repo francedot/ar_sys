@@ -5,13 +5,13 @@
 	<arg name="camera_device" default="/dev/video0"/>
 	<arg name="camera_info" default="file://$(find ar_sys)/camera_info/camera_calibration.yaml"/>
 	<arg name="camera_frame_id" default="camera1"/>
-	<arg name="camera_width" default="1280"/>
-	<arg name="camera_height" default="1024" />
+	<arg name="camera_width" default="640"/>
+	<arg name="camera_height" default="480" />
 	<arg name="camera_fps"  default="30"/>
 
 	<arg name="result_display" default="true"/>
 	<arg name="result_autosize" default="true"/>
-	<arg name="result_draw_markers" default="false" />
+	<arg name="result_draw_markers" default="true" />
 	<arg name="result_draw_markers_cube" default="false" />
 	<arg name="result_draw_markers_axis" default="false" />
 
@@ -21,9 +21,11 @@
 	<arg name="video_info_topic" default="camera_info"/>
 	<arg name="video_rectified" default="true" />
 
-	<arg name="board_config" default="$(find ar_sys)/data/single/board.yml" />
+	<arg name="board_config_outer" default="$(find ar_sys)/data/single/custom_board4x4_outer.yml" />
+	<arg name="board_config_inner" default="$(find ar_sys)/data/single/custom_board4x4_inner.yml" />
 	<arg name="board_frame_id" default="board1" />
-	<arg name="marker_size" default="0.05" />
+	<arg name="marker_size_outer" default="0.05" />
+	<arg name="marker_size_inner" default="0.05" />
     <arg name="publish_tf" default="false" />
 
 
@@ -44,9 +46,11 @@
 		<remap from="/image" to="$(arg video_namespace)/$(arg video_image_topic)" />
 
 		<param name="image_is_rectified" type="bool" value="$(arg video_rectified)"/>
-		<param name="board_config" type="string" value="$(arg board_config)"/>
+		<param name="board_config_outer" type="string" value="$(arg board_config_outer)"/>
+		<param name="board_config_inner" type="string" value="$(arg board_config_inner)"/>
 		<param name="board_frame" type="string" value="/$(arg board_frame_id)" />
-		<param name="marker_size" type="double" value="$(arg marker_size)"/>
+		<param name="marker_size_outer" type="double" value="$(arg marker_size_outer)"/>
+		<param name="marker_size_inner" type="double" value="$(arg marker_size_inner)"/>
 		<param name="draw_markers" type="bool" value="$(arg result_draw_markers)" />
 		<param name="draw_markers_cube" type="bool" value="$(arg result_draw_markers_cube)" />
 		<param name="draw_markers_axis" type="bool" value="$(arg result_draw_markers_axis)" />
